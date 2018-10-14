@@ -9,12 +9,16 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.MessageContext;
 
 @Path("/greenhouse")
 public class GreenhouseService {
@@ -64,36 +68,23 @@ public class GreenhouseService {
 	}
     }
 
+    @Resource
+    private WebServiceContext context;
+    
     @Path("/set/actions")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public boolean setActions(String actions){ //TODO: IP
+    public boolean setActions(String actions){
         Access access = new Access();
-	Actions a = new Gson().fromJson(actions, Actions.class);  
+	Actions a = new Gson().fromJson(actions, Actions.class);
+	MessageContext messageContext = context.getMessageContext();
+	HttpServletRequest request = (HttpServletRequest) messageContext.get(MessageContext.SERVLET_REQUEST); 
 	try {
-	    access.dao.saveActions(a, "");
+	    access.dao.saveActions(a, request.getRemoteAddr());
 	    return true;
 	} catch (IOException | SQLException | ClassNotFoundException ex) {
 	    return false;
 	}
     }
-    
-//    @Path("/set/actions")
-//    @GET
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public String setActions(@QueryParam("light") boolean light, 
-//	    @QueryParam("water") boolean water, 
-//	    @QueryParam("exaust") boolean exaust,
-//	    @QueryParam("ip") String ip){
-//	try {
-//	    dao.connect();
-//	    Actions actions = new Actions(light, water, exaust);
-//	    dao.saveActions(actions, ip);
-//	    dao.disconnect();
-//	    return new Gson().toJson(actions);
-//	} catch (ClassNotFoundException | SQLException | IOException ex) {
-//	    return ex.getMessage();
-//	}
-//    }
     
 }
