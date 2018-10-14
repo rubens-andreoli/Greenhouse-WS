@@ -8,7 +8,7 @@ import java.util.Properties;
 
 public class Access {
     
-    private static final File CONFIG_FILE = new File("config.dat");
+    private static final File CONFIG_FILE = new File("config.properties"); //file in GF domain
     
     public final Properties p;
     public final ClimatempoAPI api;
@@ -31,6 +31,7 @@ public class Access {
     private static Properties readConfig(){
 	Properties p = new Properties();
 	try(FileInputStream in = new FileInputStream(CONFIG_FILE)){
+//	    System.out.println(CONFIG_FILE.getAbsolutePath());
 	    p.load(in);
 	    return p;
 	} catch (IOException ex) {
@@ -57,5 +58,12 @@ public class Access {
 	p.setProperty("climatempo_key", "8060c34bca8c93bab6ca23ac9a2e7da2");
 	return p;
     }
-    
+
+    //<editor-fold defaultstate="collapsed" desc="Tests">    
+//    public static void main(String[] args) {
+////	Access.saveConfig(Access.defaultConfig());
+//	Properties p = Access.readConfig();
+//	System.out.println(p.toString());
+//    }
+    //</editor-fold>
 }

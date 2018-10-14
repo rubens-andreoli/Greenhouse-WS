@@ -53,7 +53,7 @@ public class ClimatempoAPI {
 //	    
 //	    List<City> cidades = api.getCity("Ribeirão Preto");
 //	    
-//	    if(cidades.size()==0)
+//	    if(cidades.isEmpty())
 //		System.out.println("NULL ARRAY");
 //	    
 //	    for(City c : cidades){

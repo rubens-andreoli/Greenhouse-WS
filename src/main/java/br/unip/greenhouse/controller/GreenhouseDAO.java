@@ -37,7 +37,7 @@ public class GreenhouseDAO {
 	int result = -1;
 	try (Connection con = DriverManager.getConnection(dbAddress, dbUser, dbKey)){
 	    save(new File(ghFolder+Actions.FILENAME), a);
-	    String SQL = "INSERT INTO tb_action ("
+	    String SQL = "INSERT INTO tb_actions ("
 		    + "is_light,"
 		    + "is_water,"
 		    + "is_exaust,"
@@ -47,6 +47,7 @@ public class GreenhouseDAO {
 	    cmd.setBoolean(1, a.light);
 	    cmd.setBoolean(2, a.water);
 	    cmd.setBoolean(3, a.exaust);
+	    cmd.setString(4, ip);
 	    if (cmd.executeUpdate() > 0) {
 		ResultSet rs = cmd.getGeneratedKeys();
 		result =  rs.next() ? rs.getInt(1) : -1;
@@ -60,20 +61,20 @@ public class GreenhouseDAO {
 	int result = -1;
 	try (Connection con = DriverManager.getConnection(dbAddress, dbUser, dbKey)){
 	    String SQL = "INSERT INTO tb_info ("
-		    + "temperature_out,"
 		    + "temperature_in,"
-		    + "humidity_air_out,"
 		    + "humidity_air_in,"
 		    + "humidity_soil,"
-		    + "soil_ph) "
+		    + "soil_ph,"
+		    + "temperature_out,"
+		    + "humidity_air_out) "
 		    + "VALUES (?,?,?,?,?,?)";
 	    PreparedStatement cmd = con.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
-	    cmd.setFloat(1, i.airTemperature);
-	    cmd.setFloat(2, i.sensors.airTemperature);
-	    cmd.setFloat(3, i.airHumidity);
-	    cmd.setFloat(4, i.sensors.airHumidity);
-	    cmd.setFloat(5, i.sensors.soilHumidity);
-	    cmd.setFloat(6, i.sensors.soilPh);
+	    cmd.setFloat(1, i.sensors.airTemperature);
+	    cmd.setFloat(2, i.sensors.airHumidity);
+	    cmd.setFloat(3, i.sensors.soilHumidity);
+	    cmd.setFloat(4, i.sensors.soilPh);
+	    cmd.setFloat(5, i.airTemperature);
+	    cmd.setFloat(6, i.airHumidity);
 	    if (cmd.executeUpdate() > 0) {
 		ResultSet rs = cmd.getGeneratedKeys();
 		result = rs.next() ? rs.getInt(1) : -1;
@@ -90,17 +91,17 @@ public class GreenhouseDAO {
 	    PreparedStatement cmd = con.prepareStatement(SQL);
 	    ResultSet rs = cmd.executeQuery();
 	    while (rs.next()) {
-		lista.add(new Info(
-			new Sensors(
-				rs.getFloat("temperature_in"), 
-				rs.getFloat("humidity_air_in"), 
-				rs.getFloat("humidity_soil"), 
-				rs.getFloat("soil_ph")
-			),
+		Sensors s = new Sensors(rs.getFloat("temperature_in"), 
+			    rs.getFloat("humidity_air_in"), 
+			    rs.getFloat("humidity_soil"), 
+			    rs.getFloat("soil_ph")
+		);
+		Info i = new Info(
+			s,
 			rs.getFloat("temperature_out"),
 			rs.getFloat("humidity_air_out")
-		    )
 		);
+		lista.add(i);
 	    }
 	}
 	return lista;
@@ -133,24 +134,27 @@ public class GreenhouseDAO {
     //<editor-fold defaultstate="collapsed" desc="Tests">
 //    public static void main(String[] args) {
 //	try {
-//	    ClimatempoAPI api = new ClimatempoAPI(
-//		    "http://apiadvisor.climatempo.com.br/api/v1/", 
-//		    "8060c34bca8c93bab6ca23ac9a2e7da2"
-//	    );
 //	    GreenhouseDAO dao = new GreenhouseDAO(
 //		    "jdbc:postgresql://127.0.0.1:5432/greenhouse",
 //		    "postgres",
 //		    "postgres123",
 //		    "D:/Cloud/Unip/APS/WebService/greenhouseiot-repo/"
 //	    );
-//	    dao.connect();
-//	    System.out.println(dao.saveActions(new Actions(true, false, false), "192.168.0.1"));
-//	    Weather w = api.getWeather("3618");
-//	    System.out.println(dao.saveInfo(new Info(dao.getSensors(), w.data.temperature, w.data.humidity)));
 //	    System.out.println(dao.getActions());
 //	    System.out.println(dao.getSensors());
-//	    for(Info i : dao.listInfo()){
-//		System.out.println(i);
+//	    Actions a = new Actions(false, true, false);
+//	    System.out.println(dao.saveActions(a, "192.168.0.1"));
+//	    
+//	    ClimatempoAPI api = new ClimatempoAPI(
+//		    "http://apiadvisor.climatempo.com.br/api/v1/", 
+//		    "8060c34bca8c93bab6ca23ac9a2e7da2"
+//	    );
+//	    Weather w = api.getWeather("3618");
+//	    Info i = new Info(dao.getSensors(), w.data.temperature, w.data.humidity);
+//	    System.out.println(dao.saveInfo(i));
+//	    
+//	    for(Info iDb : dao.listInfo()){
+//		System.out.println(iDb);
 //	    }
 //	} catch (ClassNotFoundException | SQLException | IOException ex) {
 //	    ex.printStackTrace();
