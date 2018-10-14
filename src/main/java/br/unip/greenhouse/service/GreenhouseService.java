@@ -14,7 +14,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -22,9 +21,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.handler.MessageContext;
 
 @Path("/greenhouse")
 public class GreenhouseService {
@@ -92,22 +90,18 @@ public class GreenhouseService {
 	}
     }
 
-    @Resource
-    private WebServiceContext context;
-    
+
+    @Context private HttpServletRequest request;
     @Path("/set/actions")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public boolean setActions(String actions){
+    public String setActions(String actions){
         GreenhouseDAO dao = new GreenhouseDAO(new Configuration());
-	Actions a = new Gson().fromJson(actions, Actions.class);
-	MessageContext messageContext = context.getMessageContext();
-	HttpServletRequest request = (HttpServletRequest) messageContext.get(MessageContext.SERVLET_REQUEST); 
+	Actions a = new Gson().fromJson(actions, Actions.class); 
 	try {
-	    dao.saveActions(a, request.getRemoteAddr());
-	    return true;
+	    return String.valueOf(dao.saveActions(a, request.getRemoteAddr()));
 	} catch (IOException | SQLException | ClassNotFoundException ex) {
-	    return false;
+	    return ex.getMessage();
 	}
     }
     
