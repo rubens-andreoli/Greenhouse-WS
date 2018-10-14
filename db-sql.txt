@@ -1,0 +1,59 @@
+CREATE DATABASE greenhouse
+  WITH OWNER = postgres
+       ENCODING = 'UTF8'
+       TABLESPACE = pg_default
+       LC_COLLATE = 'Portuguese_Brazil.1252'
+       LC_CTYPE = 'Portuguese_Brazil.1252'
+       CONNECTION LIMIT = -1;
+
+CREATE SEQUENCE public.tb_action_id_seq
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9223372036854775807
+  START 14
+  CACHE 1;
+ALTER TABLE public.tb_action_id_seq
+  OWNER TO postgres;
+  
+CREATE SEQUENCE public.tb_info_id_seq
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9223372036854775807
+  START 36
+  CACHE 1;
+ALTER TABLE public.tb_info_id_seq
+  OWNER TO postgres;
+	   
+CREATE TABLE public.tb_actions
+(
+  id integer NOT NULL DEFAULT nextval('tb_action_id_seq'::regclass),
+  is_light boolean NOT NULL,
+  is_water boolean NOT NULL,
+  is_exaust boolean NOT NULL,
+  user_ip character varying(39) NOT NULL,
+  "time" timestamp without time zone NOT NULL DEFAULT now(),
+  CONSTRAINT pk_tb_action PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.tb_actions
+  OWNER TO postgres;
+
+CREATE TABLE public.tb_info
+(
+  id integer NOT NULL DEFAULT nextval('tb_info_id_seq'::regclass),
+  temperature_in numeric(6,2) NOT NULL,
+  humidity_air_in numeric(4,2) NOT NULL,
+  humidity_soil numeric(4,2) NOT NULL,
+  soil_ph numeric(4,2) NOT NULL,
+  "time" timestamp without time zone NOT NULL DEFAULT now(),
+  temperature_out numeric(6,2) NOT NULL,
+  humidity_air_out numeric(6,2) NOT NULL,
+  CONSTRAINT pk_tb_info PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.tb_info
+  OWNER TO postgres;
