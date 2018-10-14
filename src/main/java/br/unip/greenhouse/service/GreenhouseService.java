@@ -8,6 +8,9 @@ import br.unip.greenhouse.model.Weather;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +18,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.xml.ws.WebServiceContext;
@@ -64,6 +68,22 @@ public class GreenhouseService {
 	    List<Info> info = access.dao.listInfo();
 	    return new Gson().toJson(info);
 	} catch (ClassNotFoundException | SQLException ex) {
+	    return ex.getMessage();
+	}
+    }
+    
+    @Path("/list/info/{start}:{end}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String listInfo(@PathParam("start") String start, @PathParam("end") String end){
+	SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+	Access access = new Access();
+	try {
+	    Date startDate = (Date)formatter.parse(start);
+	    Date endDate = (Date)formatter.parse(end);
+	    List<Info> info = access.dao.listInfo(startDate, endDate);
+	    return new Gson().toJson(info);
+	} catch (ClassNotFoundException | SQLException | ParseException ex) {
 	    return ex.getMessage();
 	}
     }

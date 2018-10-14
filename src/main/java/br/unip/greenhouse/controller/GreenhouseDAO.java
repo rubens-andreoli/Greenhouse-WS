@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class GreenhouseDAO {
@@ -82,29 +83,47 @@ public class GreenhouseDAO {
 	}
 	return result;
     }
-    
+
     public List<Info> listInfo() throws SQLException, ClassNotFoundException {
 	Class.forName("org.postgresql.Driver");
-	List<Info> lista = new ArrayList<>();
+	List<Info> list = new ArrayList<>();
 	try(Connection con = DriverManager.getConnection(dbAddress, dbUser, dbKey)){
 	    String SQL = "SELECT * FROM tb_info ORDER BY time";
 	    PreparedStatement cmd = con.prepareStatement(SQL);
-	    ResultSet rs = cmd.executeQuery();
-	    while (rs.next()) {
-		Sensors s = new Sensors(rs.getFloat("temperature_in"), 
-			    rs.getFloat("humidity_air_in"), 
-			    rs.getFloat("humidity_soil"), 
-			    rs.getFloat("soil_ph")
-		);
-		Info i = new Info(
-			s,
-			rs.getFloat("temperature_out"),
-			rs.getFloat("humidity_air_out")
-		);
-		lista.add(i);
-	    }
+	    populateInfo(cmd.executeQuery(), list);
 	}
-	return lista;
+	return list;
+    }
+
+    public List<Info> listInfo(Date start, Date end/*not inclusive*/) throws SQLException, ClassNotFoundException {
+	Class.forName("org.postgresql.Driver");
+	List<Info> list = new ArrayList<>();
+	try(Connection con = DriverManager.getConnection(dbAddress, dbUser, dbKey)){
+	    String SQL = "SELECT * FROM tb_info WHERE time BETWEEN ? and ? ORDER BY time";
+	    PreparedStatement cmd = con.prepareStatement(SQL);
+	    cmd.setDate(1, new java.sql.Date(start.getTime()));
+	    cmd.setDate(2, new java.sql.Date(end.getTime()));
+	    populateInfo(cmd.executeQuery(), list);
+	}
+	return list;
+    }
+    
+    private void populateInfo(ResultSet rs, List<Info> list) throws SQLException{
+	while (rs.next()) {
+	    Sensors s = new Sensors(
+		    rs.getFloat("temperature_in"), 
+		    rs.getFloat("humidity_air_in"), 
+		    rs.getFloat("humidity_soil"), 
+		    rs.getFloat("soil_ph")
+	    );
+	    Info i = new Info(
+		    s,
+		    rs.getFloat("temperature_out"),
+		    rs.getFloat("humidity_air_out"),
+		    rs.getDate("time")
+	    );
+	    list.add(i);
+	}
     }
     
     public Actions getActions() throws IOException{
@@ -142,7 +161,7 @@ public class GreenhouseDAO {
 //	    );
 //	    System.out.println(dao.getActions());
 //	    System.out.println(dao.getSensors());
-//	    Actions a = new Actions(false, true, false);
+//	    Actions a = new Actions(false, false, false);
 //	    System.out.println(dao.saveActions(a, "192.168.0.1"));
 //	    
 //	    ClimatempoAPI api = new ClimatempoAPI(
@@ -152,11 +171,14 @@ public class GreenhouseDAO {
 //	    Weather w = api.getWeather("3618");
 //	    Info i = new Info(dao.getSensors(), w.data.temperature, w.data.humidity);
 //	    System.out.println(dao.saveInfo(i));
-//	    
-//	    for(Info iDb : dao.listInfo()){
+//	    SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+//	    Date start = (Date)formatter.parse("12-10-2018");
+//	    Date end = (Date)formatter.parse("14-10-2018");
+//
+//	    for(Info iDb : dao.listInfo(start, end)){
 //		System.out.println(iDb);
 //	    }
-//	} catch (ClassNotFoundException | SQLException | IOException ex) {
+//	} catch (ClassNotFoundException | SQLException | ParseException ex) {
 //	    ex.printStackTrace();
 //	}
 //    }
