@@ -32,8 +32,13 @@ public class GreenhouseDAO {
 	this.dbKey = dbKey;
 	this.ghFolder = ghFolder;
     }
+    
+    public GreenhouseDAO(Configuration c){
+	this(c.getDBAddress(), c.getDBUser(), c.getDBKey(), c.getGHFolder());
+    }
 
-    public int saveActions(Actions a, String ip) throws IOException, SQLException, ClassNotFoundException {
+    public int saveActions(Actions a, String ip) 
+	    throws IOException, SQLException, ClassNotFoundException {
 	Class.forName("org.postgresql.Driver");
 	int result = -1;
 	try (Connection con = DriverManager.getConnection(dbAddress, dbUser, dbKey)){
@@ -95,7 +100,8 @@ public class GreenhouseDAO {
 	return list;
     }
 
-    public List<Info> listInfo(Date start, Date end/*not inclusive*/) throws SQLException, ClassNotFoundException {
+    public List<Info> listInfo(Date start, Date end/*not inclusive*/) 
+	    throws SQLException, ClassNotFoundException {
 	Class.forName("org.postgresql.Driver");
 	List<Info> list = new ArrayList<>();
 	try(Connection con = DriverManager.getConnection(dbAddress, dbUser, dbKey)){

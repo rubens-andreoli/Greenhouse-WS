@@ -13,7 +13,11 @@ public class Info {
 	this.sensors = sensors;
 	this.airTemperature = airTemperature;
 	this.airHumidity = airHumidity;
-	this.date = date;
+	if(date == null){
+	    this.date = new Date(new java.util.Date().getTime());
+	}else{
+	    this.date = date;
+	}
     }
     
     public Info(Sensors sensors, float airTemperature, float airHumidity){

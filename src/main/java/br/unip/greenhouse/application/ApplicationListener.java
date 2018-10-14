@@ -1,6 +1,8 @@
-package org.netbeans.rest.applicationConfig;
+package br.unip.greenhouse.application;
 
-import br.unip.greenhouse.controller.Access;
+import br.unip.greenhouse.controller.ClimatempoAPI;
+import br.unip.greenhouse.controller.Configuration;
+import br.unip.greenhouse.controller.GreenhouseDAO;
 import br.unip.greenhouse.model.Info;
 import br.unip.greenhouse.model.Sensors;
 import br.unip.greenhouse.model.Weather;
@@ -34,12 +36,14 @@ public class ApplicationListener implements ServletContextListener {
 		System.out.println("---------------------SERVICE LOOP "
 			+ "["+Thread.currentThread().getName()+"] "
 			+ "---------------------");
-		Access access = new Access();
+		Configuration conf = new Configuration();
+		ClimatempoAPI api = new ClimatempoAPI(conf);
+		GreenhouseDAO dao = new GreenhouseDAO(conf);
 		try {
-		    Weather weather = access.api.getWeather(access.p.getProperty("greenhouse_city"));
-		    Sensors sensors = access.dao.getSensors();
+		    Weather weather = api.getWeather();
+		    Sensors sensors = dao.getSensors();
 		    Info info = new Info(sensors, weather.data.temperature, weather.data.humidity);
-		    access.dao.saveInfo(info);
+		    dao.saveInfo(info);
 		} catch (IOException | SQLException | ClassNotFoundException ex) {
 		    System.out.println("LOOP ERROR");
 		}

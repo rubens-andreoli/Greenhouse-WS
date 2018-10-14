@@ -1,4 +1,4 @@
-package org.netbeans.rest.applicationConfig;
+package br.unip.greenhouse.application;
 
 import java.util.Set;
 import javax.ws.rs.core.Application;
